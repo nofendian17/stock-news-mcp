@@ -18,6 +18,9 @@ const logger = pino(
   pino.destination(2), // stderr
 );
 
+// Track server state
+let isShuttingDown = false;
+
 // Create MCP server
 const server = new Server(
   {
@@ -75,6 +78,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  if (isShuttingDown) {
+    return {
+      content: [{ type: "text", text: "Server is shutting down" }],
+      isError: true,
+    };
+  }
+
   const { name, arguments: args } = request.params;
 
   if (name === "scrape_stock_news") {
@@ -82,7 +92,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       logger.info({ args }, "Scraping stock news");
 
       const params = ScrapeNewsParamsSchema.parse(args);
-      const articles = await scrapeStockNews(params);
+
+      // Add timeout to prevent hanging
+      const timeoutMs = 60000; // 60 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(
+          () => reject(new Error("Request timeout after 60s")),
+          timeoutMs,
+        );
+      });
+
+      const articles = (await Promise.race([
+        scrapeStockNews(params),
+        timeoutPromise,
+      ])) as any;
 
       logger.info({ count: articles.length }, "Successfully scraped articles");
 
@@ -112,30 +135,49 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   throw new Error(`Unknown tool: ${name}`);
 });
 
+// Graceful shutdown handler
+async function shutdown(signal: string) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  logger.info({ signal }, "Received shutdown signal");
+
+  try {
+    await browserManager.cleanup();
+    await server.close();
+    logger.info("Server closed gracefully");
+  } catch (error) {
+    logger.error({ error }, "Error during shutdown");
+  }
+
+  process.exit(0);
+}
+
 // Start server
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  logger.info("MCP Saham News Server started");
+  logger.info("MCP Saham News Server started successfully");
 
   // Handle graceful shutdown
-  process.on("SIGINT", async () => {
-    logger.info("Shutting down...");
-    await browserManager.cleanup();
-    await server.close();
-    process.exit(0);
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+  // Prevent uncaught errors from crashing the server
+  process.on("uncaughtException", (error) => {
+    logger.error({ error }, "Uncaught exception");
+    // Don't exit - let the server continue running
   });
 
-  process.on("SIGTERM", async () => {
-    logger.info("Shutting down...");
-    await browserManager.cleanup();
-    await server.close();
-    process.exit(0);
+  process.on("unhandledRejection", (reason) => {
+    logger.error({ reason }, "Unhandled rejection");
+    // Don't exit - let the server continue running
   });
 }
 
 main().catch((error) => {
-  logger.error({ error }, "Fatal error");
-  process.exit(1);
+  logger.error({ error }, "Fatal error in main");
+  // Don't exit immediately - give time for cleanup
+  setTimeout(() => process.exit(1), 1000);
 });
