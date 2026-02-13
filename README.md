@@ -138,7 +138,7 @@ Scrape latest Indonesian stock market news.
 
 **Parameters:**
 
-- `source` (required): News source - `cnbc`, `kontan`, `bisnis`, `investing`, `emitennews`, or `all`
+- `source` (required): News source - `cnbc`, `kontan`, `bisnis`, `emitennews`, or `all`
 - `limit` (optional): Number of articles to return (1-50, default: 10)
 - `keywords` (optional): Array of keywords to filter articles
 
