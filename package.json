@@ -37,7 +37,7 @@
     "date-fns": "^4.1.0",
     "extract-zip": "^2.0.1",
     "pino": "^9.5.0",
-    "puppeteer": "^24.0.0",
+    "puppeteer": "^24.37.3",
     "zod": "^3.24.1"
   }
 }
