@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+*.png
+*.jpg
+.DS_Store
+.env
+.vscode/
+coverage/
+.npm/

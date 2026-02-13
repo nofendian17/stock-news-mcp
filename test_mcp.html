@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Halaman MCP</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      .content {
+        margin: 20px 0;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+      }
+      #output {
+        margin-top: 20px;
+        padding: 10px;
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Selamat Datang di Test MCP Chrome DevTools</h1>
+
+    <div class="content">
+      <p>Ini adalah paragraf pertama untuk testing.</p>
+      <p>
+        Ini adalah paragraf kedua dengan <strong>teks tebal</strong> dan
+        <em>teks miring</em>.
+      </p>
+    </div>
+
+    <div class="content">
+      <h2>Form Test</h2>
+      <form id="testForm">
+        <label for="nama">Nama:</label>
+        <input type="text" id="nama" name="nama" placeholder="Masukkan nama" />
+        <br /><br />
+        <label for="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Masukkan email"
+        />
+        <br /><br />
+        <label for="kategori">Kategori:</label>
+        <select id="kategori" name="kategori">
+          <option value="">Pilih kategori</option>
+          <option value="a">Kategori A</option>
+          <option value="b">Kategori B</option>
+          <option value="c">Kategori C</option>
+        </select>
+        <br /><br />
+        <button type="submit">Kirim</button>
+      </form>
+    </div>
+
+    <div class="content">
+      <h2>Tombol Interaktif</h2>
+      <button onclick="showMessage()">Klik Saya</button>
+      <button onclick="changeColor()">Ubah Warna</button>
+      <button onclick="addItem()">Tambah Item</button>
+    </div>
+
+    <div id="output"></div>
+
+    <ul id="list">
+      <li>Item 1</li>
+      <li>Item 2</li>
+      <li>Item 3</li>
+    </ul>
+
+    <script>
+      function showMessage() {
+        document.getElementById("output").innerHTML =
+          "Tombol diklik pada: " + new Date().toLocaleString();
+      }
+
+      function changeColor() {
+        const colors = ["#ffcccc", "#ccffcc", "#ccccff", "#ffffcc", "#ccffff"];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        document.body.style.backgroundColor = randomColor;
+      }
+
+      function addItem() {
+        const list = document.getElementById("list");
+        const newItem = document.createElement("li");
+        newItem.textContent = "Item " + (list.children.length + 1);
+        list.appendChild(newItem);
+      }
+
+      document
+        .getElementById("testForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const nama = document.getElementById("nama").value;
+          const email = document.getElementById("email").value;
+          const kategori = document.getElementById("kategori").value;
+          document.getElementById("output").innerHTML =
+            "Form dikirim!<br>Nama: " +
+            nama +
+            "<br>Email: " +
+            email +
+            "<br>Kategori: " +
+            kategori;
+        });
+    </script>
+  </body>
+</html>
