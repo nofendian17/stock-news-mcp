@@ -15,7 +15,16 @@ export class EmitenNewsScraper extends AbstractScraper {
     const articles: NewsArticle[] = [];
 
     try {
-      await this.navigateWithRetry(`${this.baseUrl}/search/`, "a.news-card-2");
+      // Build search URL with keywords
+      let searchUrl: string;
+      if (mergedConfig.keywords && mergedConfig.keywords.length > 0) {
+        const keyword = mergedConfig.keywords[0]; // Use first keyword
+        searchUrl = `${this.baseUrl}/search/${encodeURIComponent(keyword)}`;
+      } else {
+        searchUrl = `${this.baseUrl}/search/`;
+      }
+
+      await this.navigateWithRetry(searchUrl, "a.news-card-2");
 
       const articlesData = await this.page.evaluate(() => {
         const items: Array<{

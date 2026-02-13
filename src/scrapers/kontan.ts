@@ -14,7 +14,16 @@ export class KontanScraper extends AbstractScraper {
     const articles: NewsArticle[] = [];
 
     try {
-      await this.navigateWithRetry(this.baseUrl, "ul#list-news");
+      // Build search URL with keywords
+      let searchUrl: string;
+      if (mergedConfig.keywords && mergedConfig.keywords.length > 0) {
+        const keyword = mergedConfig.keywords.join(" "); // Join multiple keywords
+        searchUrl = `${this.baseUrl}/search/?search=${encodeURIComponent(keyword)}`;
+      } else {
+        searchUrl = this.baseUrl;
+      }
+
+      await this.navigateWithRetry(searchUrl, "ul#list-news");
 
       // Extract article data
       const articlesData = await this.page.evaluate(() => {

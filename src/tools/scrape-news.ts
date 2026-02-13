@@ -23,6 +23,7 @@ export async function scrapeStockNews(
   const scraperConfig = {
     maxArticles: limit,
     includeContent: includeContent,
+    keywords: keywords,
   };
 
   const scrapers = {
@@ -50,17 +51,6 @@ export async function scrapeStockNews(
     // Scrape from specific source
     const scraper = scrapers[source];
     allArticles = await scraper.scrapeWithCleanup();
-  }
-
-  // Filter by keywords if provided
-  if (keywords && keywords.length > 0) {
-    allArticles = allArticles.filter((article) => {
-      const searchText =
-        `${article.title} ${article.summary || ""}`.toLowerCase();
-      return keywords.some((keyword) =>
-        searchText.includes(keyword.toLowerCase()),
-      );
-    });
   }
 
   // Sort by date (newest first) and limit

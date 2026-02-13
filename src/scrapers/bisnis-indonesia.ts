@@ -14,7 +14,15 @@ export class BisnisIndonesiaScraper extends AbstractScraper {
     const articles: NewsArticle[] = [];
 
     try {
-      const searchUrl = `${this.baseUrl}/?q=saham`;
+      // Build search URL with keywords
+      let searchUrl: string;
+      if (mergedConfig.keywords && mergedConfig.keywords.length > 0) {
+        const keyword = mergedConfig.keywords.join(" "); // Join multiple keywords
+        searchUrl = `${this.baseUrl}/?q=${encodeURIComponent(keyword)}`;
+      } else {
+        searchUrl = `${this.baseUrl}/?q=saham`;
+      }
+
       await this.navigateWithRetry(searchUrl, "a.artLink");
 
       const articlesData = await this.page.evaluate(() => {

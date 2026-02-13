@@ -14,7 +14,16 @@ export class CNBCIndonesiaScraper extends AbstractScraper {
     const articles: NewsArticle[] = [];
 
     try {
-      await this.navigateWithRetry(`${this.baseUrl}/market`, "a.group");
+      // Build search URL with keywords
+      let searchUrl: string;
+      if (mergedConfig.keywords && mergedConfig.keywords.length > 0) {
+        const keyword = mergedConfig.keywords[0]; // Use first keyword
+        searchUrl = `${this.baseUrl}/search?query=${encodeURIComponent(keyword)}`;
+      } else {
+        searchUrl = `${this.baseUrl}/market`;
+      }
+
+      await this.navigateWithRetry(searchUrl, "a.group");
 
       // Extract article data
       const articlesData = await this.page.evaluate(() => {
