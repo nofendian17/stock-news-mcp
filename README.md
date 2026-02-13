@@ -19,53 +19,22 @@ MCP (Model Context Protocol) server for scraping Indonesian stock market news fr
 ## Installation
 
 ```bash
-npm install
+npm install -g mcp-saham-news
 ```
 
 ## Configuration
 
-The server uses Puppeteer with system Chrome. Make sure you have Chrome/Chromium installed:
+The server requires Chrome/Chromium and uses environment variables:
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get install chromium-browser
+# Required: Path to Chrome executable
+export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
-# Or set custom path
-export PUPPETEER_EXECUTABLE_PATH=/path/to/chrome
+# Optional: Log level (debug, info, warn, error)
+export LOG_LEVEL=info
 ```
 
-## Usage
-
-### Development
-
-```bash
-npm run dev
-```
-
-### Build
-
-```bash
-npm run build
-```
-
-### Production
-
-```bash
-npm start
-```
-
-## MCP Client Setup
-
-To use this server with MCP-compatible clients (Claude Desktop, Cline, etc.):
-
-### 1. Build the Project
-
-```bash
-npm install
-npm run build
-```
-
-### 2. Install Chrome
+### Install Chrome (if not already installed)
 
 ```bash
 # Ubuntu/Debian
@@ -75,7 +44,30 @@ sudo apt-get install chromium-browser
 brew install chromium
 ```
 
-### 3. Configure Claude Desktop
+## MCP Client Setup
+
+### KiloCode / Cline (VS Code)
+
+Add to your MCP settings (global or workspace):
+
+```json
+{
+  "mcpServers": {
+    "saham-news": {
+      "command": "npx",
+      "args": ["mcp-saham-news"],
+      "env": {
+        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/google-chrome",
+        "LOG_LEVEL": "info"
+      },
+      "disabled": false,
+      "alwaysAllow": ["scrape_stock_news"]
+    }
+  }
+}
+```
+
+### Claude Desktop
 
 Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%/Claude/claude_desktop_config.json` (Windows):
 
@@ -83,50 +75,32 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 {
   "mcpServers": {
     "saham-news": {
-      "command": "node",
-      "args": ["/full/path/to/mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["mcp-saham-news"],
       "env": {
-        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/google-chrome"
       }
     }
   }
 }
 ```
 
-**Linux example:**
+**Alternatively**, use the globally installed command:
 
 ```json
 {
   "mcpServers": {
     "saham-news": {
-      "command": "node",
-      "args": ["/home/username/projects/mcp/dist/index.js"],
+      "command": "mcp-saham-news",
       "env": {
-        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/google-chrome"
       }
     }
   }
 }
 ```
 
-### 4. Configure Cline (VS Code)
-
-Add to your VS Code settings or `cline_mcp_settings.json`:
-
-```json
-{
-  "mcpServers": [
-    {
-      "name": "saham-news",
-      "transport": "stdio",
-      "command": "node",
-      "args": ["/full/path/to/mcp/dist/index.js"]
-    }
-  ]
-}
-```
-
-### 5. Restart Client
+### Restart Client
 
 Restart Claude Desktop or VS Code to load the MCP server.
 
@@ -141,6 +115,7 @@ Scrape latest Indonesian stock market news.
 - `source` (required): News source - `cnbc`, `kontan`, `bisnis`, `emitennews`, or `all`
 - `limit` (optional): Number of articles to return (1-50, default: 10)
 - `keywords` (optional): Array of keywords to filter articles
+- `includeContent` (optional): Fetch full article body (default: false)
 
 **Example:**
 
@@ -168,9 +143,21 @@ Scrape latest Indonesian stock market news.
 ]
 ```
 
-## Testing Individual Scrapers
+## Development
 
-You can test each scraper independently:
+### Build the Project
+
+```bash
+npm run build
+```
+
+### Run in Development Mode
+
+```bash
+npm run dev
+```
+
+### Test Individual Scrapers
 
 ```bash
 # Test EmitenNews scraper
@@ -186,12 +173,13 @@ npx tsx src/scrapers/cnbc-indonesia.ts
 src/
 ├── index.ts              # MCP server entry point
 ├── types/index.ts        # TypeScript type definitions
+├── browser-manager.ts    # Puppeteer browser manager
 ├── scrapers/
 │   ├── base.ts           # Abstract base scraper
-│   ├── emitennews.ts
+│   ├── emiteanews.ts
 │   ├── cnbc-indonesia.ts
 │   ├── kontan.ts
-│   ├── bisnis-indonesia.ts
+│   └── bisnis-indonesia.ts
 └── tools/
     └── scrape-news.ts    # MCP tool implementation
 ```

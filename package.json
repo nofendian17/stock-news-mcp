@@ -4,6 +4,9 @@
   "description": "MCP server for scraping Indonesian stock market news",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "mcp-saham-news": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
