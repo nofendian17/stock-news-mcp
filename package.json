@@ -1,6 +1,6 @@
 {
   "name": "mcp-saham-news",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for scraping Indonesian stock market news",
   "type": "module",
   "main": "dist/index.js",
